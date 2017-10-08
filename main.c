@@ -8,9 +8,9 @@
 void FreeMatrix(int Row, int Col, double **Matrix)
 {
     for (int i = 0; i < (Row * Col); i++)
-     {
+    {
          free(Matrix[i]);
-     }
+    }
      free(Matrix);
 }
 
