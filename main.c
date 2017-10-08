@@ -3,82 +3,90 @@
 #include <string.h>
 #include <errno.h>
 
-void freeMatrix(int row, int col, double **matrix)
+#define MAX_PATH_SIZE 100
+
+void FreeMatrix(int Row, int Col, double **Matrix)
 {
-    for (int i = 0; i < (row * col); i++)
+    for (int i = 0; i < (Row * Col); i++)
      {
-         free(matrix[i]);
+         free(Matrix[i]);
      }
-     free(matrix);
+     free(Matrix);
 }
 
-void printMatrix(int row, int col, double **matrix)
+void PrintMatrix(int Row, int Col, double **Matrix)
 {
-    printf("\nRows: %d\n", row);
-    printf("Columns: %d\n", col);
-    for (int i = 0; i < row; i++)
+    printf("\nRows: %d\n", Row);
+    printf("Columns: %d\n", Col);
+    for (int i = 0; i < Row; i++)
     {
-        for (int j = 0; j < col; j++)
-            printf("%.2lf ", matrix[i][j]);
-        printf("\n");
+        for(int j = 0; j < Col; j++)
+        {
+            printf("%.2lf ", Matrix[i][j]);
+        }
+        puts("");
     }
-    printf("\n");
-
 }
 
-double **get_matrix(FILE *file, int row, int col)       //создает матрицу из файла
+//создает матрицу из файла
+double **GetMatrix(FILE *file)
 {
-    double **matrix = (double**) malloc((row * col) * sizeof(double*));
-    for (int i = 0; i < (row * col); i++)
+    fseek(file, 0, SEEK_SET);
+    int Row = 0;
+    int Col = 0;
+
+    fscanf(file, "%d", &Row);
+    fscanf(file, "%d", &Col);
+    double **Matrix = (double**) malloc((Row * Col) * sizeof(double*));
+    for (int i = 0; i < (Row * Col); i++)
     {
-        matrix[i] = (double*) malloc((row * col) * sizeof(double));
+        Matrix[i] = (double*) malloc((Row * Col) * sizeof(double));
     }
 
-    double buff = 0.0;
+    double Buff = 0.0;
 
     while (!feof(file))
     {
-        for(int i = 0; i < row; i++)
+        for(int i = 0; i < Row; i++)
         {
-            for(int j = 0; j < col; j++)
+            for(int j = 0; j < Col; j++)
             {
 
-                fscanf(file, "%lf" , &buff);
-                if(buff > (sizeof(double)-1))
+                fscanf(file, "%lf" , &Buff);
+                if(Buff > (sizeof(double) - 1))
                 {
                     printf("\nElement is too big!\n");
-                    exit(1);
+                    exit(NULL);
                 }
-                matrix[i][j] = buff;
+                Matrix[i][j] = Buff;
             }
         }
     }
-    return matrix;
+    return Matrix;
 }
 
-double **multiply(double **amatrix, double **bmatrix, int aRow, int bCol, int aCol)     //возвращает матрицу, являющуюся результатом умножения amatrix и bmatrix
+//возвращает матрицу, являющуюся результатом умножения aMatrix и bMatrix
+double **multiply(double **aMatrix, double **bMatrix, int aRow, int bCol, int aCol)
 {
-    double **cmatrix = (double**) malloc((aRow * bCol) * sizeof(double*));
+    double **cMatrix = (double**) malloc((aRow * bCol) * sizeof(double*));
     for (int i = 0; i < (aRow * bCol); i++)
     {
-        cmatrix[i] = (int*) malloc((aRow * bCol) * sizeof(int));
+        cMatrix[i] = (int*) malloc((aRow * bCol) * sizeof(int));
     }
 
     for(int i = 0; i < aRow; i++)
     {
         for(int j = 0; j < bCol; j++)
         {
-            cmatrix[i][j] = 0;
-            for(int k = 0; k < aCol; k++)
+            cMatrix[i][j] = 0;
+            for(int k = 0; k < aCol; k++)       //лишнего цикла точно нет
             {
-                cmatrix[i][j] += amatrix[i][k] * bmatrix[k][j];
+                cMatrix[i][j] += aMatrix[i][k] * bMatrix[k][j];
             }
         }
     }
-    return cmatrix;
+    return cMatrix;
 }
-
-#define MAX_PATH_SIZE 100
 
 int main()
 {
@@ -88,24 +96,24 @@ int main()
     printf("Enter amount of files: ");
     scanf("%d", &N);
 
-    if(N <= 1)
+    if (N <= 1)
     {
         printf("\nNothing to multiply! Press enter to exit...\n");
-        exit(0);
+        exit(1);
     }
-
-    double **amatrix = NULL;
-    double **bmatrix = NULL;
-    double **cmatrix = NULL;
 
     int aRow = 0;       //количество строк для матрицы А (то же самое для матрицы В)
     int aCol = 0;       //количество столбцов для матрицы А (то же самое для матрицы В)
     int bRow = 0;
     int bCol = 0;
 
+    double **aMatrix = NULL;
+    double **bMatrix = NULL;
+    double **cMatrix = NULL;
+
     for (int i = 0; i < N; i++)
     {
-        printf("Enter the path of the %d file: ", i+1);
+        printf("\nEnter the path of the %d file: ", i+1);
         scanf("%s", &filePath);
 
         FILE *file = fopen(filePath, "r");
@@ -116,13 +124,14 @@ int main()
             exit(1);
         }
 
-        switch (i) {
-        case 0:
+        if (i == 0)
+        {
             fscanf(file, "%d", &aRow);
             fscanf(file, "%d", &aCol);
-            amatrix = get_matrix(file, aRow, aCol);
-            break;
-        default:
+            aMatrix = GetMatrix(file);
+        }
+        else
+        {
             fscanf(file, "%d", &bRow);
             fscanf(file, "%d", &bCol);
 
@@ -132,19 +141,20 @@ int main()
                 exit(1);
             }
 
-            bmatrix = get_matrix(file, bRow, bCol);
-            cmatrix = multiply(amatrix, bmatrix, aRow, bCol, aCol);
-            amatrix = cmatrix;
-            break;
+            bMatrix = GetMatrix(file);
+            cMatrix = multiply(aMatrix, bMatrix, aRow, bCol, aCol);
+            aMatrix = cMatrix;
         }
 
-        printMatrix(aRow, aCol, amatrix);
+        PrintMatrix(aRow, aCol, aMatrix);
         fclose(file);
     }
-    printf("RESULT: \n");
-    printMatrix(aRow, bCol, cmatrix);
+    printf("\nRESULT: \n");
+    PrintMatrix(aRow, bCol, cMatrix);
 
-    freeMatrix(aRow, aCol, amatrix);
-    freeMatrix(bRow, bCol, bmatrix);
-    freeMatrix(aRow, bCol, cmatrix);
+    FreeMatrix(aRow, aCol, aMatrix);
+    FreeMatrix(bRow, bCol, bMatrix);
+    FreeMatrix(aRow, bCol, cMatrix);
+
+    return 0;
 }
