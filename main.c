@@ -1,0 +1,122 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+
+void freeMatrix(int row, int col, double **matrix)
+{
+    for (int i = 0; i < (row * col); i++)
+     {
+         free(matrix[i]);
+     }
+     free(matrix);
+}
+
+void printMatrix(int row, int col, double **matrix)
+{
+    printf("Rows: %d\n", row);
+    printf("Columns: %d\n", col);
+    for (int i = 0; i < row; i++)
+    {
+        for (int j = 0; j < col; j++)
+            printf("%lf ", matrix[i][j]);
+        printf("\n");
+    }
+}
+
+/*void multiply(int a)
+{
+    double **resultMatrix = (double**) malloc((aRow * bCol) * sizeof(double*));
+    for (int i = 0; i < (aRow * bCol); i++)
+    {
+        resultMatrix[i] = (int*) malloc((aRow * bCol) * sizeof(int));
+    }
+
+    for(int i = 0; i < aRow; i++)
+    {
+        for(int j = 0; j < bCol; j++)
+        {
+            resultMatrix[i][j] = 0;
+            for(int k = 0; k < aCol; k++)
+            {
+                resultMatrix[i][j] += aMatrix[i][k] * bMatrix[k][j];
+            }
+        }
+    }
+}*/
+
+#define MAX_PATH_SIZE 100
+
+int main(int argc, char* argv[])
+{
+    char filePath[MAX_PATH_SIZE];
+    int N = 0;
+
+    printf("Enter amount of files: ");
+    scanf("%d", &N);
+
+    int row = 0;
+    int col = 0;
+
+    for (int i = 0; i < N; i++)
+    {
+        printf("Enter the path of the %d file: ", i+1);
+        scanf("%s", &filePath);
+
+        FILE *file = fopen(filePath, "r");
+
+        if (!file)
+        {
+            printf("\nCan't open file! Errno: %d\n", ENOENT);
+            exit(1);
+        }
+
+        int row = 0;       //количество строк в матрице
+        int col = 0;       //количество столбцов в матрице
+
+        double buff = 0;       //буфер чисел в файле
+
+        fscanf(file, "%d", &row);
+        buff = 0;
+
+        fscanf(file, "%d", &col);
+        buff = 0;
+
+        double **matrix = (double**) malloc((row * col) * sizeof(double*));
+        for (int i = 0; i < (row * col); i++)
+        {
+            matrix[i] = (double*) malloc((row * col) * sizeof(double));
+        }
+
+        while (!feof(file))
+        {
+            for(int i = 0; i < row; i++)
+            {
+                for(int j = 0; j < col; j++)
+                {
+
+                    fscanf(file, "%lf" , &buff);
+                    if(buff > (sizeof(double)-1))
+                    {
+                        printf("\nElement is too big!\n");
+                        exit(1);
+                    }
+                    matrix[i][j] = buff;
+                }
+            }
+        }
+
+        /*switch (i) {
+        case 0:
+            memcpy(amatrix, matrix, sizeof(matrix));
+            break;
+        default:
+            memcpy(bmatrix, matrix, sizeof(matrix));
+            multiply(amatrix, bmatrix);
+            memcpy(amatrix, cmatrix, sizeof(cmatrix));
+            break;
+        }*/
+        printMatrix(row, col, matrix);
+        fclose(file);
+    }
+}
