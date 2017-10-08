@@ -120,7 +120,7 @@ int main()
 
         if (!file)
         {
-            printf("\nCan't open file! Errno: %d\n", ENOENT);
+            printf("\nCan't open file! Errno: %d\n Press enter to exit...", ENOENT);
             exit(1);
         }
 
