@@ -38,14 +38,14 @@ double **GetMatrix(FILE *file)
     fscanf(file, "%d", &Row);
     fscanf(file, "%d", &Col);
     double **Matrix = (double**) malloc((Row * Col) * sizeof(double*));
-    for (int i = 0; i < (Row * Col); i++)
+    for(int i = 0; i < (Row * Col); i++)
     {
         Matrix[i] = (double*) malloc((Row * Col) * sizeof(double));
     }
 
     double Buff = 0.0;
 
-    while (!feof(file))
+    while(!feof(file))
     {
         for(int i = 0; i < Row; i++)
         {
@@ -69,7 +69,7 @@ double **GetMatrix(FILE *file)
 double **multiply(double **aMatrix, double **bMatrix, int aRow, int bCol, int aCol)
 {
     double **cMatrix = (double**) malloc((aRow * bCol) * sizeof(double*));
-    for (int i = 0; i < (aRow * bCol); i++)
+    for(int i = 0; i < (aRow * bCol); i++)
     {
         cMatrix[i] = (int*) malloc((aRow * bCol) * sizeof(int));
     }
@@ -96,7 +96,7 @@ int main()
     printf("Enter amount of files: ");
     scanf("%d", &N);
 
-    if (N <= 1)
+    if(N <= 1)
     {
         printf("\nNothing to multiply! Press enter to exit...\n");
         exit(1);
@@ -111,20 +111,20 @@ int main()
     double **bMatrix = NULL;
     double **cMatrix = NULL;
 
-    for (int i = 0; i < N; i++)
+    for(int i = 0; i < N; i++)
     {
         printf("\nEnter the path of the %d file: ", i+1);
         scanf("%s", &filePath);
 
         FILE *file = fopen(filePath, "r");
 
-        if (!file)
+        if(!file)
         {
             printf("\nCan't open file! Errno: %d\n Press enter to exit...", ENOENT);
             exit(1);
         }
 
-        if (i == 0)
+        if(i == 0)
         {
             fscanf(file, "%d", &aRow);
             fscanf(file, "%d", &aCol);
@@ -137,7 +137,7 @@ int main()
 
             if(aCol != bRow)    //проверка возможности умножения
             {
-                printf("\nCan't multiply!\n");
+                printf("\nCan't multiply! Press enter to exit...\n");
                 exit(1);
             }
 
